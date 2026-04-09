@@ -1,0 +1,87 @@
+{
+  "name": "DIFC Dubai Shares — سوق دبي للاستثمار",
+  "short_name": "DIFC Invest",
+  "description": "منصة استثمار موثوقة مرخصة من DIFC دبي — أرباح يومية مضمونة",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020912",
+  "theme_color": "#020912",
+  "orientation": "portrait-primary",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["finance", "business"],
+  "icons": [
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/opengraph.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "label": "DIFC Dubai Shares — الشاشة الرئيسية"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "المستثمر",
+      "short_name": "حسابي",
+      "description": "الدخول لحساب المستثمر",
+      "url": "/investor",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "الأسواق",
+      "short_name": "الأسواق",
+      "description": "أسواق الخليج والعالم",
+      "url": "/markets",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
+}
