@@ -406,7 +406,7 @@ function InvestorLogin({ onLogin }: { onLogin: (inv: Investor) => void }) {
 
             {/* Remember me */}
             <label className="flex items-center gap-3 justify-end cursor-pointer select-none py-1">
-              <span className="text-slate-400 text-sm">تذكرني لمدة 7 أيام</span>
+              <span className="text-slate-400 text-sm">تذكرني</span>
               <div
                 onClick={() => setRememberMe(!rememberMe)}
                 className="w-11 h-6 rounded-full relative cursor-pointer transition-all flex-shrink-0"
