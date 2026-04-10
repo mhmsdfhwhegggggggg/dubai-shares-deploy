@@ -70,7 +70,7 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (user === 'admin' && pass === 'admin123') {
+    if (user === 'admin' && pass === 'ebraheem') {
       onLogin();
     } else {
       setError('اسم المستخدم أو كلمة المرور غير صحيحة');
@@ -113,7 +113,6 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
             تسجيل الدخول
           </button>
         </form>
-        <p className="text-gray-500 text-xs text-center mt-4">admin / admin123</p>
       </div>
     </div>
   );
