@@ -166,6 +166,7 @@ function InvestorLogin({ onLogin }: { onLogin: (inv: Investor) => void }) {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -190,127 +191,528 @@ function InvestorLogin({ onLogin }: { onLogin: (inv: Investor) => void }) {
     finally { setLoading(false); }
   };
 
+  const inputStyle = (field: string) => ({
+    background: focused === field ? 'rgba(0,217,126,0.04)' : 'rgba(255,255,255,0.04)',
+    border: `1px solid ${focused === field ? 'rgba(0,217,126,0.5)' : 'rgba(255,255,255,0.1)'}`,
+    boxShadow: focused === field ? '0 0 0 3px rgba(0,217,126,0.08)' : 'none',
+    transition: 'all 0.2s ease',
+    outline: 'none',
+  });
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" dir="rtl"
-      style={{ background: 'linear-gradient(135deg, #020912 0%, #030d1a 50%, #020912 100%)' }}>
+    <div className="min-h-screen flex relative overflow-hidden" dir="rtl"
+      style={{ background: '#020912' }}>
 
-      {/* Grid pattern */}
+      {/* Animated background layers */}
       <div className="absolute inset-0" style={{
-        backgroundImage: 'linear-gradient(rgba(0,217,126,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,217,126,0.04) 1px, transparent 1px)',
-        backgroundSize: '40px 40px'
+        background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,217,126,0.12) 0%, transparent 60%)',
       }} />
+      <div className="absolute inset-0" style={{
+        backgroundImage: 'linear-gradient(rgba(0,217,126,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,217,126,0.03) 1px, transparent 1px)',
+        backgroundSize: '60px 60px',
+      }} />
+      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,217,126,0.4), rgba(212,175,55,0.4), transparent)' }} />
 
-      {/* Glows */}
-      <div className="absolute top-[-20%] right-[-10%] w-[55%] h-[55%] rounded-full" style={{ background: 'radial-gradient(circle, rgba(0,217,126,0.08) 0%, transparent 70%)' }} />
-      <div className="absolute bottom-[-20%] left-[-10%] w-[55%] h-[55%] rounded-full" style={{ background: 'radial-gradient(circle, rgba(58,159,216,0.06) 0%, transparent 70%)' }} />
+      {/* LEFT PANEL — Branding (desktop only) */}
+      <div className="hidden lg:flex flex-col justify-between w-[48%] p-14 relative"
+        style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
 
-
-      <div className="w-full max-w-md z-10">
-        {/* Back button */}
-        <button onClick={() => navigate(-1)}
-          className="flex items-center gap-1 text-slate-500 hover:text-slate-300 text-xs mb-6 transition-colors">
-          <ChevronRight size={14} /> رجوع للرئيسية
-        </button>
-
-        {/* Card */}
-        <div className="rounded-3xl p-8" style={{
-          background: 'rgba(15,23,42,0.85)',
-          backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(212,175,55,0.2)',
-          boxShadow: '0 0 60px rgba(0,217,126,0.06), 0 25px 60px rgba(0,0,0,0.5)'
-        }}>
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="w-24 h-24 mx-auto mb-5 relative">
-              <div className="w-full h-full rounded-2xl flex items-center justify-center relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #0d1f2d 0%, #071523 100%)', border: '2px solid rgba(212,175,55,0.55)', boxShadow: '0 0 0 4px rgba(0,217,126,0.12), 0 12px 36px rgba(0,0,0,0.6), 0 0 50px rgba(0,217,126,0.18)' }}>
-                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 60% 30%, rgba(0,217,126,0.15) 0%, transparent 65%)' }} />
-                <svg width="52" height="52" viewBox="0 0 52 52" fill="none" style={{ position: 'relative', zIndex: 1 }}>
-                  <rect x="4" y="32" width="6" height="14" rx="2" fill="#00d97e" opacity="0.7"/>
-                  <rect x="13" y="24" width="6" height="22" rx="2" fill="#00d97e" opacity="0.85"/>
-                  <rect x="22" y="16" width="6" height="30" rx="2" fill="#00d97e"/>
-                  <rect x="31" y="20" width="6" height="26" rx="2" fill="#d4af37" opacity="0.8"/>
-                  <rect x="40" y="10" width="6" height="36" rx="2" fill="#d4af37"/>
-                  <polyline points="7,30 16,22 25,14 34,18 43,8" stroke="#00d97e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                  <circle cx="43" cy="8" r="3" fill="#00d97e"/>
-                </svg>
-              </div>
-              <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg,#00d97e,#059669)', boxShadow: '0 4px 12px rgba(0,217,126,0.4)', border: '2px solid #020912' }}>
-                <ShieldCheck size={14} style={{ color: '#020912' }} />
-              </div>
+        {/* Top brand */}
+        <div>
+          <div className="flex items-center gap-3 mb-16">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center relative overflow-hidden"
+              style={{ background: 'linear-gradient(135deg,#0d1f2d,#071523)', border: '1.5px solid rgba(212,175,55,0.5)', boxShadow: '0 0 24px rgba(0,217,126,0.2)' }}>
+              <svg width="26" height="26" viewBox="0 0 52 52" fill="none">
+                <rect x="4" y="32" width="6" height="14" rx="2" fill="#00d97e" opacity="0.7"/>
+                <rect x="13" y="24" width="6" height="22" rx="2" fill="#00d97e" opacity="0.85"/>
+                <rect x="22" y="16" width="6" height="30" rx="2" fill="#00d97e"/>
+                <rect x="31" y="20" width="6" height="26" rx="2" fill="#d4af37" opacity="0.8"/>
+                <rect x="40" y="10" width="6" height="36" rx="2" fill="#d4af37"/>
+                <polyline points="7,30 16,22 25,14 34,18 43,8" stroke="#00d97e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <circle cx="43" cy="8" r="3" fill="#00d97e"/>
+              </svg>
             </div>
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3"
-              style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)' }}>
-              <span className="text-[10px] font-black tracking-widest" style={{ color: '#d4af37' }}>DIFC — مركز دبي المالي العالمي</span>
+            <div>
+              <p className="text-white font-black text-sm tracking-wider">DIFC DUBAI SHARES</p>
+              <p className="text-[10px] font-bold tracking-widest" style={{ color: '#d4af37' }}>INVESTMENT PLATFORM</p>
             </div>
-            <h1 className="text-white text-2xl font-black">بوابة المستثمر</h1>
-            <p className="text-slate-500 text-xs mt-1">الدخول الآمن لحسابك الاستثماري</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Main headline */}
+          <div className="mb-12">
+            <h1 className="text-5xl font-black text-white leading-tight mb-4">
+              منصة الاستثمار<br />
+              <span style={{ color: '#00d97e' }}>الذكي</span>
+            </h1>
+            <p className="text-slate-400 text-base leading-relaxed">
+              بوابتك الآمنة لإدارة محفظتك الاستثمارية<br />
+              في قلب المركز المالي العالمي بدبي
+            </p>
+          </div>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-4 mb-12">
+            {[
+              { value: '$2.4B+', label: 'حجم التداول' },
+              { value: '12,000+', label: 'مستثمر نشط' },
+              { value: '99.98%', label: 'وقت التشغيل' },
+            ].map((s, i) => (
+              <div key={i} className="rounded-2xl p-4 text-center"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <p className="font-black text-lg text-white">{s.value}</p>
+                <p className="text-slate-500 text-[10px] mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Trust badges */}
+          <div className="space-y-3">
+            {[
+              { icon: '🔐', text: 'تشفير AES-256 — بروتوكول TLS 1.3', sub: 'حماية عسكرية المستوى' },
+              { icon: '🏛️', text: 'مُرخَّص من هيئة DFSA — مركز دبي المالي', sub: 'تنظيم حكومي معتمد' },
+              { icon: '🛡️', text: 'مراقبة أمنية على مدار 24/7', sub: 'نظام كشف التهديدات الآني' },
+            ].map((b, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <span className="text-xl">{b.icon}</span>
+                <div>
+                  <p className="text-white text-xs font-bold">{b.text}</p>
+                  <p className="text-slate-500 text-[10px]">{b.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom cert */}
+        <div className="flex items-center gap-4">
+          <div className="px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest"
+            style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', color: '#d4af37' }}>
+            DIFC REGULATED
+          </div>
+          <div className="px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest"
+            style={{ background: 'rgba(0,217,126,0.06)', border: '1px solid rgba(0,217,126,0.2)', color: '#00d97e' }}>
+            ISO 27001 CERTIFIED
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT PANEL — Login form */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
+
+        {/* Back button */}
+        <div className="absolute top-6 right-6">
+          <button onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#94a3b8' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#e2e8f0'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#94a3b8'; }}>
+            <ChevronRight size={14} /> رجوع للرئيسية
+          </button>
+        </div>
+
+        <div className="w-full max-w-sm">
+
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-10">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center relative overflow-hidden"
+              style={{ background: 'linear-gradient(135deg,#0d1f2d,#071523)', border: '2px solid rgba(212,175,55,0.5)', boxShadow: '0 0 40px rgba(0,217,126,0.2)' }}>
+              <svg width="42" height="42" viewBox="0 0 52 52" fill="none">
+                <rect x="4" y="32" width="6" height="14" rx="2" fill="#00d97e" opacity="0.7"/>
+                <rect x="13" y="24" width="6" height="22" rx="2" fill="#00d97e" opacity="0.85"/>
+                <rect x="22" y="16" width="6" height="30" rx="2" fill="#00d97e"/>
+                <rect x="31" y="20" width="6" height="26" rx="2" fill="#d4af37" opacity="0.8"/>
+                <rect x="40" y="10" width="6" height="36" rx="2" fill="#d4af37"/>
+                <polyline points="7,30 16,22 25,14 34,18 43,8" stroke="#00d97e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <circle cx="43" cy="8" r="3" fill="#00d97e"/>
+              </svg>
+            </div>
+            <p className="text-white font-black tracking-wider text-sm">DIFC DUBAI SHARES</p>
+            <p className="text-[10px] font-bold" style={{ color: '#d4af37' }}>INVESTMENT PLATFORM</p>
+          </div>
+
+          {/* Form header */}
+          <div className="mb-8">
+            <h2 className="text-white text-2xl font-black mb-1">تسجيل الدخول</h2>
+            <p className="text-slate-500 text-sm">أدخل بيانات حسابك الاستثماري</p>
+          </div>
+
+          {/* Session alert */}
+          <div className="flex items-center gap-2 mb-6 px-4 py-2.5 rounded-xl"
+            style={{ background: 'rgba(0,217,126,0.05)', border: '1px solid rgba(0,217,126,0.15)' }}>
+            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#00d97e', boxShadow: '0 0 6px #00d97e' }} />
+            <span className="text-[11px] font-bold" style={{ color: '#00d97e' }}>جلسة مشفرة — اتصال آمن TLS 1.3</span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div>
-              <label className="text-slate-400 text-[11px] font-black uppercase tracking-widest block mb-2">هوية المستثمر</label>
+              <label className="block text-[11px] font-black uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>
+                هوية المستثمر
+              </label>
               <div className="relative">
-                <input type="text" value={username} onChange={e => setUsername(e.target.value)}
-                  className="w-full text-white px-4 py-3.5 rounded-2xl text-right placeholder:text-slate-600 focus:outline-none transition-all text-sm"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', outline: 'none' }}
-                  onFocus={e => e.currentTarget.style.borderColor = 'rgba(0,217,126,0.4)'}
-                  onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
-                  placeholder="اسم المستخدم" />
-                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  onFocus={() => setFocused('user')}
+                  onBlur={() => setFocused(null)}
+                  className="w-full text-white px-4 py-3.5 rounded-2xl text-right placeholder:text-slate-700 text-sm"
+                  style={inputStyle('user')}
+                  placeholder="اسم المستخدم"
+                  autoComplete="username"
+                  required
+                />
+                <User size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: focused === 'user' ? '#00d97e' : '#475569' }} />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="text-slate-400 text-[11px] font-black uppercase tracking-widest block mb-2">كلمة المرور</label>
+              <label className="block text-[11px] font-black uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>
+                كلمة المرور
+              </label>
               <div className="relative">
-                <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                  className="w-full text-white px-4 py-3.5 rounded-2xl text-right placeholder:text-slate-600 focus:outline-none transition-all text-sm pr-12"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-                  onFocus={e => e.currentTarget.style.borderColor = 'rgba(0,217,126,0.4)'}
-                  onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
-                  placeholder="••••••••" autoComplete="current-password" />
-                <Lock size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600" />
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  onFocus={() => setFocused('pass')}
+                  onBlur={() => setFocused(null)}
+                  className="w-full text-white px-4 py-3.5 rounded-2xl text-right placeholder:text-slate-700 text-sm pr-12"
+                  style={inputStyle('pass')}
+                  placeholder="••••••••••"
+                  autoComplete="current-password"
+                  required
+                />
+                <Lock size={15} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: focused === 'pass' ? '#00d97e' : '#475569' }} />
                 <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
-                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: '#475569' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#e2e8f0'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = '#475569'; }}>
+                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
 
+            {/* Error */}
             {error && (
-              <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-bold"
-                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
-                <Info size={14} /> {error}
+              <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold"
+                style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
+                <AlertTriangle size={14} className="flex-shrink-0" /> {error}
               </div>
             )}
 
             {/* Remember me */}
-            <label className="flex items-center gap-3 justify-end cursor-pointer select-none">
-              <span className="text-slate-400 text-sm">تذكرني</span>
-              <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)}
-                className="w-4 h-4 accent-emerald-500 rounded" />
+            <label className="flex items-center gap-3 justify-end cursor-pointer select-none py-1">
+              <span className="text-slate-400 text-sm">تذكرني لمدة 7 أيام</span>
+              <div
+                onClick={() => setRememberMe(!rememberMe)}
+                className="w-11 h-6 rounded-full relative cursor-pointer transition-all flex-shrink-0"
+                style={{ background: rememberMe ? 'linear-gradient(90deg,#00d97e,#059669)' : 'rgba(255,255,255,0.1)', boxShadow: rememberMe ? '0 0 12px rgba(0,217,126,0.3)' : 'none' }}>
+                <div className="w-4 h-4 bg-white rounded-full absolute top-1 transition-all"
+                  style={{ right: rememberMe ? '4px' : '24px' }} />
+              </div>
             </label>
 
             {/* Submit */}
-            <button type="submit" disabled={loading}
-              className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 relative overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #00d97e, #059669)', color: '#020912', boxShadow: '0 8px 30px rgba(0,217,126,0.3)' }}>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-2xl font-black text-base transition-all relative overflow-hidden group"
+              style={{ background: loading ? 'rgba(0,217,126,0.3)' : 'linear-gradient(135deg, #00d97e 0%, #059669 100%)', color: '#020912', boxShadow: '0 8px 32px rgba(0,217,126,0.25)', border: 'none' }}
+              onMouseEnter={e => { if (!loading) e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,217,126,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,217,126,0.25)'; }}>
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%)' }} />
               {loading
-                ? <RefreshCw className="animate-spin mx-auto" size={22} />
-                : <span className="flex items-center justify-center gap-2">دخول آمن <ShieldCheck size={18} /></span>
+                ? <RefreshCw className="animate-spin mx-auto" size={20} />
+                : <span className="flex items-center justify-center gap-2">
+                    <ShieldCheck size={18} /> دخول آمن إلى حسابي
+                  </span>
               }
             </button>
           </form>
 
-          {/* Security badge */}
-          <div className="mt-6 flex items-center justify-center gap-2 text-slate-600">
-            <ShieldCheck size={13} />
-            <span className="text-[11px]">اتصال مشفر TLS 256-bit — DIFC Regulated</span>
+          {/* Bottom security row */}
+          <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {[
+                { icon: '🔒', label: 'TLS 1.3' },
+                { icon: '🏛️', label: 'DFSA' },
+                { icon: '🛡️', label: 'ISO 27001' },
+              ].map((b, i) => (
+                <div key={i} className="py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div className="text-base mb-0.5">{b.icon}</div>
+                  <div className="text-[9px] font-black tracking-widest text-slate-600">{b.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────── CHANGE CREDENTIALS MODAL ────────────────────────── */
+function ChangeCredentialsModal({ investor, onClose, onUpdate }: {
+  investor: Investor;
+  onClose: () => void;
+  onUpdate: (newUsername: string) => void;
+}) {
+  const [step, setStep] = useState<'verify' | 'change' | 'success'>('verify');
+  const [currentPass, setCurrentPass] = useState('');
+  const [newUsername, setNewUsername] = useState(investor.username || '');
+  const [newPass, setNewPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [focused, setFocused] = useState<string | null>(null);
+
+  const fStyle = (f: string) => ({
+    background: focused === f ? 'rgba(0,217,126,0.04)' : 'rgba(255,255,255,0.04)',
+    border: `1px solid ${focused === f ? 'rgba(0,217,126,0.5)' : 'rgba(255,255,255,0.1)'}`,
+    boxShadow: focused === f ? '0 0 0 3px rgba(0,217,126,0.08)' : 'none',
+    outline: 'none', transition: 'all 0.2s ease',
+  });
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true); setError('');
+    try {
+      const res = await fetch('/api/investors/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: investor.username, password: currentPass })
+      });
+      if (res.ok) { setStep('change'); }
+      else { setError('كلمة المرور الحالية غير صحيحة'); }
+    } catch { setError('خطأ في الاتصال بالخادم'); }
+    finally { setLoading(false); }
+  };
+
+  const handleChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (newPass && newPass !== confirmPass) { setError('كلمة المرور الجديدة غير متطابقة'); return; }
+    if (newPass && newPass.length < 6) { setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); return; }
+    const updates: Record<string, string> = {};
+    if (newUsername.trim() && newUsername.trim() !== investor.username) updates.username = newUsername.trim();
+    if (newPass) updates.password = newPass;
+    if (Object.keys(updates).length === 0) { setError('لم تقم بأي تعديل'); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/investors/${investor.id}/credentials`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: currentPass, ...updates })
+      });
+      if (res.ok) {
+        if (updates.username) {
+          localStorage.setItem('inv_user', updates.username);
+          onUpdate(updates.username);
+        }
+        if (updates.password) localStorage.setItem('inv_pass', updates.password);
+        setStep('success');
+      } else {
+        const err = await res.json();
+        setError(err.error || 'فشل تحديث البيانات');
+      }
+    } catch { setError('خطأ في الاتصال بالخادم'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" dir="rtl"
+      style={{ background: 'rgba(2,9,18,0.92)', backdropFilter: 'blur(12px)' }}>
+      <div className="w-full max-w-md rounded-3xl overflow-hidden" style={{
+        background: 'linear-gradient(160deg, #0a1628 0%, #060e1c 100%)',
+        border: '1px solid rgba(212,175,55,0.2)',
+        boxShadow: '0 0 80px rgba(0,217,126,0.08), 0 40px 80px rgba(0,0,0,0.6)',
+      }}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <button onClick={onClose} className="w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+            style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.12)'; e.currentTarget.style.color = '#f87171'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}>
+            <X size={16} />
+          </button>
+          <div className="text-right">
+            <h3 className="text-white font-black text-base">تغيير بيانات الدخول</h3>
+            <p className="text-slate-500 text-xs">تحديث اسم المستخدم أو كلمة المرور</p>
+          </div>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(0,217,126,0.1)', border: '1px solid rgba(0,217,126,0.2)' }}>
+            <Lock size={18} style={{ color: '#00d97e' }} />
+          </div>
+        </div>
+
+        {/* Steps indicator */}
+        <div className="flex items-center gap-0 px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          {['التحقق', 'التعديل', 'تم'].map((label, i) => (
+            <div key={i} className="flex items-center gap-0 flex-1">
+              <div className="flex items-center gap-2 flex-1">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 transition-all"
+                  style={{
+                    background: (step === 'verify' && i === 0) || (step === 'change' && i === 1) || (step === 'success' && i === 2)
+                      ? 'linear-gradient(135deg,#00d97e,#059669)' : i < (['verify','change','success'].indexOf(step))
+                      ? 'rgba(0,217,126,0.2)' : 'rgba(255,255,255,0.06)',
+                    color: (step === 'verify' && i === 0) || (step === 'change' && i === 1) || (step === 'success' && i === 2)
+                      ? '#020912' : '#64748b'
+                  }}>
+                  {i < (['verify','change','success'].indexOf(step)) ? <CheckCircle size={14} /> : i + 1}
+                </div>
+                <span className="text-[11px] font-bold text-slate-500">{label}</span>
+              </div>
+              {i < 2 && <div className="w-6 h-px mx-1 flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)' }} />}
+            </div>
+          ))}
+        </div>
+
+        <div className="p-6">
+          {/* Step 1: Verify current password */}
+          {step === 'verify' && (
+            <form onSubmit={handleVerify} className="space-y-4">
+              <div className="flex items-start gap-3 p-4 rounded-2xl mb-2"
+                style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)' }}>
+                <AlertTriangle size={16} style={{ color: '#d4af37', flexShrink: 0, marginTop: 2 }} />
+                <p className="text-[12px] leading-relaxed" style={{ color: '#d4af37' }}>
+                  للتحقق من هويتك، يرجى إدخال كلمة المرور الحالية قبل تعديل بيانات الدخول
+                </p>
+              </div>
+              <div>
+                <label className="block text-[11px] font-black uppercase tracking-widest mb-2 text-slate-500">كلمة المرور الحالية</label>
+                <div className="relative">
+                  <input type={showCurrent ? 'text' : 'password'} value={currentPass} onChange={e => setCurrentPass(e.target.value)}
+                    onFocus={() => setFocused('cur')} onBlur={() => setFocused(null)}
+                    className="w-full text-white px-4 py-3.5 rounded-2xl text-right placeholder:text-slate-700 text-sm pr-12"
+                    style={fStyle('cur')} placeholder="••••••••" required />
+                  <Lock size={15} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: focused === 'cur' ? '#00d97e' : '#475569' }} />
+                  <button type="button" onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
+                    {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+              {error && <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold"
+                style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
+                <AlertTriangle size={13} /> {error}
+              </div>}
+              <button type="submit" disabled={loading || !currentPass}
+                className="w-full py-3.5 rounded-2xl font-black text-sm transition-all disabled:opacity-40"
+                style={{ background: 'linear-gradient(135deg,#00d97e,#059669)', color: '#020912', boxShadow: '0 6px 24px rgba(0,217,126,0.2)' }}>
+                {loading ? <RefreshCw className="animate-spin mx-auto" size={18} /> : <span className="flex items-center justify-center gap-2"><ShieldCheck size={16}/> تحقق وتابع</span>}
+              </button>
+            </form>
+          )}
+
+          {/* Step 2: Change credentials */}
+          {step === 'change' && (
+            <form onSubmit={handleChange} className="space-y-4">
+              <div className="flex items-center gap-2 p-3 rounded-xl mb-2"
+                style={{ background: 'rgba(0,217,126,0.05)', border: '1px solid rgba(0,217,126,0.15)' }}>
+                <CheckCircle size={14} style={{ color: '#00d97e' }} />
+                <p className="text-xs font-bold" style={{ color: '#00d97e' }}>تم التحقق من هويتك — يمكنك الآن تعديل بيانات الدخول</p>
+              </div>
+
+              {/* New username */}
+              <div>
+                <label className="block text-[11px] font-black uppercase tracking-widest mb-2 text-slate-500">
+                  اسم المستخدم الجديد <span className="text-slate-600 normal-case">(اتركه لعدم التغيير)</span>
+                </label>
+                <div className="relative">
+                  <input type="text" value={newUsername} onChange={e => setNewUsername(e.target.value)}
+                    onFocus={() => setFocused('nu')} onBlur={() => setFocused(null)}
+                    className="w-full text-white px-4 py-3.5 rounded-2xl text-right placeholder:text-slate-700 text-sm"
+                    style={fStyle('nu')} placeholder={investor.username} />
+                  <User size={15} className="absolute left-4 top-1/2 -translate-y-1/2" style={{ color: focused === 'nu' ? '#00d97e' : '#475569' }} />
+                </div>
+              </div>
+
+              {/* New password */}
+              <div>
+                <label className="block text-[11px] font-black uppercase tracking-widest mb-2 text-slate-500">
+                  كلمة المرور الجديدة <span className="text-slate-600 normal-case">(اتركها لعدم التغيير)</span>
+                </label>
+                <div className="relative">
+                  <input type={showNew ? 'text' : 'password'} value={newPass} onChange={e => setNewPass(e.target.value)}
+                    onFocus={() => setFocused('np')} onBlur={() => setFocused(null)}
+                    className="w-full text-white px-4 py-3.5 rounded-2xl text-right placeholder:text-slate-700 text-sm pr-12"
+                    style={fStyle('np')} placeholder="6 أحرف على الأقل" />
+                  <Lock size={15} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: focused === 'np' ? '#00d97e' : '#475569' }} />
+                  <button type="button" onClick={() => setShowNew(!showNew)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
+                    {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm password */}
+              {newPass && (
+                <div>
+                  <label className="block text-[11px] font-black uppercase tracking-widest mb-2 text-slate-500">تأكيد كلمة المرور</label>
+                  <div className="relative">
+                    <input type={showConfirm ? 'text' : 'password'} value={confirmPass} onChange={e => setConfirmPass(e.target.value)}
+                      onFocus={() => setFocused('cp')} onBlur={() => setFocused(null)}
+                      className="w-full text-white px-4 py-3.5 rounded-2xl text-right placeholder:text-slate-700 text-sm pr-12"
+                      style={{ ...fStyle('cp'), borderColor: confirmPass && confirmPass !== newPass ? 'rgba(239,68,68,0.5)' : fStyle('cp').border?.split(' ').pop() }}
+                      placeholder="أعد كتابة كلمة المرور" />
+                    <Lock size={15} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: focused === 'cp' ? '#00d97e' : '#475569' }} />
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
+                      {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                    {confirmPass && (
+                      <div className="absolute left-10 top-1/2 -translate-y-1/2">
+                        {confirmPass === newPass
+                          ? <CheckCircle size={14} style={{ color: '#00d97e' }} />
+                          : <X size={14} style={{ color: '#f87171' }} />}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {error && <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold"
+                style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
+                <AlertTriangle size={13} /> {error}
+              </div>}
+
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setStep('verify')}
+                  className="flex-1 py-3.5 rounded-2xl font-bold text-sm transition-all"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#94a3b8' }}>
+                  رجوع
+                </button>
+                <button type="submit" disabled={loading}
+                  className="flex-1 py-3.5 rounded-2xl font-black text-sm transition-all disabled:opacity-40"
+                  style={{ background: 'linear-gradient(135deg,#00d97e,#059669)', color: '#020912', boxShadow: '0 6px 24px rgba(0,217,126,0.2)' }}>
+                  {loading ? <RefreshCw className="animate-spin mx-auto" size={18} /> : 'حفظ التعديلات'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Step 3: Success */}
+          {step === 'success' && (
+            <div className="text-center py-4">
+              <div className="w-20 h-20 rounded-full mx-auto mb-5 flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg,rgba(0,217,126,0.15),rgba(5,150,105,0.1))', border: '2px solid rgba(0,217,126,0.3)', boxShadow: '0 0 40px rgba(0,217,126,0.15)' }}>
+                <CheckCircle size={36} style={{ color: '#00d97e' }} />
+              </div>
+              <h4 className="text-white font-black text-xl mb-2">تم التحديث بنجاح</h4>
+              <p className="text-slate-400 text-sm mb-8">تم تحديث بيانات الدخول الخاصة بك بأمان</p>
+              <button onClick={onClose}
+                className="w-full py-3.5 rounded-2xl font-black text-sm transition-all"
+                style={{ background: 'linear-gradient(135deg,#00d97e,#059669)', color: '#020912', boxShadow: '0 6px 24px rgba(0,217,126,0.2)' }}>
+                إغلاق
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -323,6 +725,7 @@ export default function InvestorPage() {
   const [investor, setInvestor] = useState<Investor | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Withdrawal multi-step state
@@ -539,6 +942,15 @@ export default function InvestorPage() {
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <Bell size={15} className="text-slate-400" />
             </div>
+            <button
+              onClick={() => setShowCredentialsModal(true)}
+              className="w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+              title="تغيير بيانات الدخول"
+              style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.15)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.08)'; }}>
+              <Lock size={14} style={{ color: '#d4af37' }} />
+            </button>
             <button onClick={() => setInvestor(null)}
               className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all"
               style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#f87171' }}
@@ -836,6 +1248,15 @@ export default function InvestorPage() {
         </div>
 
       </main>
+
+      {/* ─────────────────── CREDENTIALS MODAL ─────────────────── */}
+      {showCredentialsModal && investor && (
+        <ChangeCredentialsModal
+          investor={investor}
+          onClose={() => setShowCredentialsModal(false)}
+          onUpdate={(newUsername) => setInvestor(prev => prev ? { ...prev, username: newUsername } : prev)}
+        />
+      )}
 
       {/* ─────────────────── WITHDRAWAL MODAL ─────────────────── */}
       {showWithdrawModal && (
