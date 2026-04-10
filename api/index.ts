@@ -96,10 +96,20 @@ const withdrawalsTable = pgTable("withdrawals", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+const depositsTable = pgTable("deposits", {
+  id: serial("id").primaryKey(),
+  investorId: integer("investor_id").notNull(),
+  amount: real("amount").notNull(),
+  currency: text("currency").notNull().default("USD"),
+  type: text("type").notNull().default("إيداع"),
+  date: text("date").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 const db = drizzle(pool, {
   schema: {
     settingsTable, offersTable, packagesTable,
-    notificationsTable, investorsTable, withdrawalsTable,
+    notificationsTable, investorsTable, withdrawalsTable, depositsTable,
   },
 });
 
@@ -370,6 +380,53 @@ app.post("/api/withdraw", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to process withdrawal" });
+  }
+});
+
+// ─── Deposits CRUD ───
+app.get("/api/deposits", async (req, res) => {
+  try {
+    const investorId = req.query.investorId;
+    let rows;
+    if (investorId) {
+      rows = await db.select().from(depositsTable).where(eq(depositsTable.investorId, Number(investorId))).orderBy(desc(depositsTable.createdAt));
+    } else {
+      rows = await db.select().from(depositsTable).orderBy(desc(depositsTable.createdAt));
+    }
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load deposits" });
+  }
+});
+
+app.post("/api/deposits", async (req, res) => {
+  try {
+    const [row] = await db.insert(depositsTable).values(req.body).returning();
+    res.status(201).json(row);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create deposit" });
+  }
+});
+
+app.patch("/api/deposits/:id", async (req, res) => {
+  try {
+    const [row] = await db.update(depositsTable).set(req.body).where(eq(depositsTable.id, Number(req.params.id))).returning();
+    res.json(row);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update deposit" });
+  }
+});
+
+app.delete("/api/deposits/:id", async (req, res) => {
+  try {
+    await db.delete(depositsTable).where(eq(depositsTable.id, Number(req.params.id)));
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete deposit" });
   }
 });
 

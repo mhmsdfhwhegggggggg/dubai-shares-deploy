@@ -3,6 +3,7 @@ import {
   Users, TrendingUp, DollarSign, FileText, Plus, Edit2, Trash2,
   Eye, EyeOff, LogOut, BarChart2, CheckCircle, XCircle, Settings,
   Save, MessageCircle, Phone, Menu, X, Bell, Package, Megaphone,
+  ArrowDownCircle,
 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
@@ -53,12 +54,21 @@ interface Investor {
   country: string;
   phone: string;
   package: string;
-  // New Vision 2030 Fields
   feePaid: boolean;
   withdrawalStatus: 'ready' | 'pending_fee' | 'restricted';
   investorBankName?: string;
   investorIBAN?: string;
   investorCryptoWallet?: string;
+}
+
+interface Deposit {
+  id: number;
+  investorId: number;
+  amount: number;
+  currency: string;
+  type: string;
+  date: string;
+  createdAt: string;
 }
 
 
@@ -522,9 +532,164 @@ function SettingsTab() {
   );
 }
 
+function DepositsTab() {
+  const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [investors, setInvestors] = useState<Investor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<Deposit | null>(null);
+  const [form, setForm] = useState({
+    investorId: 0,
+    amount: 0,
+    currency: 'USD',
+    type: 'إيداع',
+    date: new Date().toISOString().split('T')[0],
+  });
+
+  const fetchDeposits = async () => {
+    try {
+      const res = await fetch('/api/deposits');
+      const data = await res.json();
+      setDeposits(data);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  const fetchInvestors = async () => {
+    try {
+      const res = await fetch('/api/admin/investors');
+      const data = await res.json();
+      setInvestors(data);
+    } catch (e) { console.error(e); }
+  };
+
+  useEffect(() => { fetchDeposits(); fetchInvestors(); }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.investorId) return;
+    const method = editing ? 'PATCH' : 'POST';
+    const url = editing ? `/api/deposits/${editing.id}` : '/api/deposits';
+    await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    });
+    setEditing(null);
+    setForm({ investorId: 0, amount: 0, currency: 'USD', type: 'إيداع', date: new Date().toISOString().split('T')[0] });
+    fetchDeposits();
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm('حذف هذا الإيداع؟')) {
+      await fetch(`/api/deposits/${id}`, { method: 'DELETE' });
+      fetchDeposits();
+    }
+  };
+
+  const getInvestorName = (id: number) => {
+    const inv = investors.find(i => i.id === id);
+    return inv ? inv.name : `#${id}`;
+  };
+
+  const inputCls = 'w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-right text-white';
+
+  return (
+    <div dir="rtl" className="space-y-6">
+      <h2 className="text-xl font-bold text-white text-right">إدارة الإيداعات</h2>
+      <form onSubmit={handleSubmit} className="bg-slate-800 p-6 rounded-2xl border border-slate-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="text-right">
+          <label className="text-gray-400 text-xs font-bold mb-1 block">المستثمر</label>
+          <select
+            value={form.investorId}
+            onChange={e => setForm({...form, investorId: Number(e.target.value)})}
+            className={inputCls}
+            required
+          >
+            <option value={0}>اختر المستثمر</option>
+            {investors.map(inv => (
+              <option key={inv.id} value={inv.id}>{inv.name} ({inv.username})</option>
+            ))}
+          </select>
+        </div>
+        <div className="text-right">
+          <label className="text-gray-400 text-xs font-bold mb-1 block">المبلغ</label>
+          <input type="number" step="0.01" placeholder="المبلغ" value={form.amount || ''} onChange={e => setForm({...form, amount: Number(e.target.value)})} className={inputCls} required />
+        </div>
+        <div className="text-right">
+          <label className="text-gray-400 text-xs font-bold mb-1 block">العملة</label>
+          <select value={form.currency} onChange={e => setForm({...form, currency: e.target.value})} className={inputCls}>
+            {['USD', 'AED', 'SAR', 'KWD', 'QAR', 'OMR', 'BHD'].map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="text-right">
+          <label className="text-gray-400 text-xs font-bold mb-1 block">النوع</label>
+          <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className={inputCls}>
+            <option value="إيداع">إيداع</option>
+            <option value="ربح يومي">ربح يومي</option>
+            <option value="مكافأة">مكافأة</option>
+            <option value="تحويل">تحويل</option>
+          </select>
+        </div>
+        <div className="text-right">
+          <label className="text-gray-400 text-xs font-bold mb-1 block">التاريخ</label>
+          <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} className={inputCls} required />
+        </div>
+        <div className="flex items-end">
+          <button type="submit" className="w-full bg-amber-500 py-2.5 rounded-xl font-bold text-white">{editing ? 'تحديث الإيداع' : 'إضافة إيداع جديد'}</button>
+        </div>
+        {editing && (
+          <div className="lg:col-span-3">
+            <button type="button" onClick={() => {setEditing(null); setForm({ investorId: 0, amount: 0, currency: 'USD', type: 'إيداع', date: new Date().toISOString().split('T')[0] });}} className="text-gray-500 text-sm">إلغاء التعديل</button>
+          </div>
+        )}
+      </form>
+
+      <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+        <table className="w-full text-right text-sm">
+          <thead className="bg-slate-900">
+            <tr className="text-gray-400">
+              <th className="p-4">الإجراءات</th>
+              <th className="p-4">التاريخ</th>
+              <th className="p-4">النوع</th>
+              <th className="p-4">المبلغ</th>
+              <th className="p-4">المستثمر</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deposits.map(d => (
+              <tr key={d.id} className="border-t border-slate-700">
+                <td className="p-4">
+                  <div className="flex gap-2 justify-end">
+                    <button onClick={() => {
+                      setEditing(d);
+                      setForm({ investorId: d.investorId, amount: d.amount, currency: d.currency, type: d.type, date: d.date });
+                    }} className="text-blue-400"><Edit2 size={16}/></button>
+                    <button onClick={() => handleDelete(d.id)} className="text-red-400"><Trash2 size={16}/></button>
+                  </div>
+                </td>
+                <td className="p-4 text-gray-400">{d.date}</td>
+                <td className="p-4">
+                  <span className="px-2 py-1 rounded-full text-xs bg-emerald-900/50 text-emerald-400">{d.type}</span>
+                </td>
+                <td className="p-4 font-bold text-emerald-400">+{d.amount.toLocaleString()} {d.currency}</td>
+                <td className="p-4 font-bold">{getInvestorName(d.investorId)}</td>
+              </tr>
+            ))}
+            {deposits.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-gray-500">لا توجد إيداعات بعد</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'investors' | 'add' | 'reports' | 'settings' | 'packages' | 'offers' | 'requests'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'investors' | 'add' | 'reports' | 'settings' | 'packages' | 'offers' | 'requests' | 'deposits'>('overview');
 
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -643,6 +808,7 @@ export default function AdminPage() {
     { id: 'add', icon: <Plus size={18} />, label: 'إضافة مستثمر' },
     { id: 'packages', icon: <Package size={18} />, label: 'إدارة الباقات' },
     { id: 'offers', icon: <Megaphone size={18} />, label: 'إدارة العروض' },
+    { id: 'deposits', icon: <ArrowDownCircle size={18} />, label: 'إدارة الإيداعات' },
     { id: 'requests', icon: <Bell size={18} />, label: 'طلبات العملاء' },
     { id: 'reports', icon: <FileText size={18} />, label: 'التقارير المالية' },
     { id: 'settings', icon: <Settings size={18} />, label: 'إعدادات الموقع' },
@@ -717,6 +883,7 @@ export default function AdminPage() {
           {/* New Management Tabs */}
           {activeTab === 'packages' && <PackagesTab />}
           {activeTab === 'offers' && <OffersTab />}
+          {activeTab === 'deposits' && <DepositsTab />}
           {activeTab === 'requests' && <RequestsTab />}
 
           {/* Overview */}

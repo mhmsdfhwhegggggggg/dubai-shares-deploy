@@ -918,16 +918,23 @@ export default function InvestorPage() {
   const hasAdminBank = !!(investor.investorBankName || investor.investorIBAN);
   const hasAdminWallet = !!(investor.investorCryptoWallet);
 
-  // Build real transaction history from start date
-  const transactions = Array.from({ length: Math.min(daysElapsed, 7) }, (_, i) => {
-    const d = new Date(investor.startDate);
-    d.setDate(d.getDate() + (daysElapsed - i - 1));
-    return {
-      date: d.toLocaleDateString('ar-SA', { day: 'numeric', month: 'long' }),
-      amount: investor.dailyProfit,
-      type: 'ربح يومي',
-    };
-  });
+  const [transactions, setTransactions] = useState<{date: string; amount: string; type: string; currency: string}[]>([]);
+
+  useEffect(() => {
+    if (investor?.id) {
+      fetch(`/api/deposits?investorId=${investor.id}`)
+        .then(r => r.json())
+        .then((data: any[]) => {
+          setTransactions(data.map(d => ({
+            date: d.date,
+            amount: String(d.amount),
+            type: d.type || 'إيداع',
+            currency: d.currency || 'USD',
+          })));
+        })
+        .catch(() => {});
+    }
+  }, [investor?.id]);
 
   return (
     <div className="min-h-screen text-white" dir="rtl"
@@ -1249,7 +1256,7 @@ export default function InvestorPage() {
                     style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)' }}>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="font-black text-sm" style={{ color: '#00d97e' }}>+{tx.amount}</span>
-                      <span className="text-slate-600 text-[10px] font-mono">USD</span>
+                      <span className="text-slate-600 text-[10px] font-mono">{tx.currency || 'USD'}</span>
                     </div>
                     <div className="flex items-center gap-3 text-right">
                       <div>
