@@ -277,6 +277,16 @@ app.get("/api/investors", async (_req, res) => {
   }
 });
 
+app.get("/api/admin/investors", async (_req, res) => {
+  try {
+    const rows = await db.select().from(investorsTable).orderBy(desc(investorsTable.id));
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load investors" });
+  }
+});
+
 app.post("/api/investors/login", async (req, res) => {
   try {
     const { username, password } = req.body;
