@@ -537,7 +537,7 @@ export default function AdminPage() {
   // Fetch investors from API
   const fetchInvestors = async () => {
     try {
-      const response = await fetch('/api/investors');
+      const response = await fetch('/api/admin/investors');
       if (response.ok) {
         const data = await response.json();
         setInvestors(data);
