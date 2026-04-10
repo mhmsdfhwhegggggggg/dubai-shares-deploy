@@ -445,10 +445,12 @@ export default function InvestorPage() {
   if (!investor) return <InvestorLogin onLogin={setInvestor} />;
 
   const chartData = buildChartData(investor);
-  const daysElapsed = Math.max(0, Math.floor((Date.now() - new Date(investor.startDate).getTime()) / 86400000));
+  const daysElapsed = Math.max(1, Math.floor((Date.now() - new Date(investor.startDate).getTime()) / 86400000) + 1);
   const progressPct = Math.min(100, Math.round((daysElapsed / 60) * 100));
   const numTotalProfit = parseFloat(String(investor.totalProfit).replace(/,/g, '')) || 0;
   const numDailyProfit = parseFloat(String(investor.dailyProfit).replace(/,/g, '')) || 0;
+  const expectedTotalProfit = numDailyProfit * 60;
+  const achievedPct = expectedTotalProfit > 0 ? Math.min(100, Math.round((numTotalProfit / expectedTotalProfit) * 100)) : progressPct;
   const totalProfit = numTotalProfit;
   const baseCurrency = investor.currency || 'USD';
   // Display helpers: show raw value when same currency, otherwise convert
@@ -711,7 +713,7 @@ export default function InvestorPage() {
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black"
               style={{ background: 'rgba(0,217,126,0.08)', border: '1px solid rgba(0,217,126,0.2)', color: '#00d97e' }}>
-              <ArrowUpRight size={13} /> +{progressPct}% محقق
+              <ArrowUpRight size={13} /> +{achievedPct}% محقق
             </div>
             <div className="text-right">
               <h3 className="font-black text-white text-base">نمو المحفظة</h3>
