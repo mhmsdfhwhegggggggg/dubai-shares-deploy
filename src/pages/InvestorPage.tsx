@@ -158,6 +158,12 @@ const WALLETS = [
 ];
 
 /* ────────────────────────── LOGIN SCREEN ────────────────────────── */
+function genCaptcha() {
+  const a = Math.floor(Math.random() * 9) + 1;
+  const b = Math.floor(Math.random() * 9) + 1;
+  return { a, b, answer: a + b };
+}
+
 function InvestorLogin({ onLogin }: { onLogin: (inv: Investor) => void }) {
   const navigate = useNavigate();
   const [username, setUsername] = useState(() => localStorage.getItem('inv_user') || '');
@@ -167,11 +173,22 @@ function InvestorLogin({ onLogin }: { onLogin: (inv: Investor) => void }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
+  const [captcha, setCaptcha] = useState(genCaptcha);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState(false);
+
+  const refreshCaptcha = () => { setCaptcha(genCaptcha()); setCaptchaInput(''); setCaptchaError(false); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (parseInt(captchaInput) !== captcha.answer) {
+      setCaptchaError(true);
+      refreshCaptcha();
+      return;
+    }
     setLoading(true);
     setError('');
+    setCaptchaError(false);
     try {
       const response = await fetch('/api/investors/login', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -415,6 +432,36 @@ function InvestorLogin({ onLogin }: { onLogin: (inv: Investor) => void }) {
                   style={{ right: rememberMe ? '4px' : '24px' }} />
               </div>
             </label>
+
+            {/* CAPTCHA */}
+            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${captchaError ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.08)'}` }}>
+              <div className="flex items-center justify-between gap-3">
+                <button type="button" onClick={refreshCaptcha} title="تجديد السؤال"
+                  className="text-slate-500 hover:text-slate-300 transition-colors flex-shrink-0">
+                  <RefreshCw size={15} />
+                </button>
+                <input
+                  type="number"
+                  value={captchaInput}
+                  onChange={e => { setCaptchaInput(e.target.value); setCaptchaError(false); }}
+                  placeholder="الجواب"
+                  className="w-24 text-center text-white rounded-xl px-3 py-2 text-sm font-bold flex-shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${captchaError ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`, outline: 'none' }}
+                />
+                <div className="flex items-center gap-2 text-right flex-1">
+                  <span className="text-white font-black text-lg tracking-wider"
+                    style={{ fontFamily: 'monospace', color: '#00d97e' }}>
+                    {captcha.a} + {captcha.b} = ?
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-500 leading-tight">تحقق: لست روبوت</span>
+                </div>
+              </div>
+              {captchaError && (
+                <p className="text-xs font-bold mt-2 text-right" style={{ color: '#f87171' }}>
+                  ❌ إجابة خاطئة — تم تجديد السؤال، حاول مرة أخرى
+                </p>
+              )}
+            </div>
 
             {/* Submit */}
             <button
