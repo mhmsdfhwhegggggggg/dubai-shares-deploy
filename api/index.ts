@@ -292,6 +292,29 @@ app.post("/api/investors/login", async (req, res) => {
   }
 });
 
+app.patch("/api/investors/:id/credentials", async (req, res) => {
+  try {
+    const { currentPassword, username, password } = req.body;
+    const [investor] = await db.select().from(investorsTable).where(eq(investorsTable.id, Number(req.params.id))).limit(1);
+    if (!investor) return res.status(404).json({ error: "المستثمر غير موجود" });
+    if (investor.password !== currentPassword) return res.status(401).json({ error: "كلمة المرور الحالية غير صحيحة" });
+    const updates: Record<string, string> = {};
+    if (username && username !== investor.username) {
+      const [existing] = await db.select().from(investorsTable).where(eq(investorsTable.username, username)).limit(1);
+      if (existing) return res.status(409).json({ error: "اسم المستخدم مستخدم بالفعل، اختر اسماً آخر" });
+      updates.username = username;
+    }
+    if (password) updates.password = password;
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: "لم يتم إرسال أي تعديلات" });
+    const [updated] = await db.update(investorsTable).set(updates).where(eq(investorsTable.id, Number(req.params.id))).returning();
+    const { password: _pw, ...safe } = updated;
+    res.json(safe);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "فشل تحديث بيانات الدخول" });
+  }
+});
+
 app.post("/api/investors", async (req, res) => {
   try {
     const [row] = await db.insert(investorsTable).values(req.body).returning();
