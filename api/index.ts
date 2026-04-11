@@ -115,6 +115,31 @@ const db = drizzle(pool, {
   },
 });
 
+// Auto-migration: add new columns if they don't exist
+async function runMigrations() {
+  try {
+    await pool.query(`
+      ALTER TABLE investors
+        ADD COLUMN IF NOT EXISTS pending_fee_amount REAL NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS pending_fee_currency TEXT NOT NULL DEFAULT 'USD';
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS deposits (
+        id SERIAL PRIMARY KEY,
+        investor_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        currency TEXT NOT NULL DEFAULT 'USD',
+        type TEXT NOT NULL DEFAULT 'إيداع',
+        date TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+  } catch (err) {
+    console.error("Migration warning:", err);
+  }
+}
+runMigrations();
+
 const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
