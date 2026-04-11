@@ -84,6 +84,8 @@ const investorsTable = pgTable("investors", {
   investorBankName: text("investor_bank_name"),
   investorIBAN: text("investor_iban"),
   investorCryptoWallet: text("investor_crypto_wallet"),
+  pendingFeeAmount: real("pending_fee_amount").notNull().default(0),
+  pendingFeeCurrency: text("pending_fee_currency").notNull().default("USD"),
 });
 
 const withdrawalsTable = pgTable("withdrawals", {

@@ -16,6 +16,7 @@ interface Investor {
   phone: string; package: string; feePaid: boolean;
   withdrawalStatus: 'ready' | 'pending_fee' | 'restricted';
   investorBankName?: string; investorIBAN?: string; investorCryptoWallet?: string;
+  pendingFeeAmount?: number; pendingFeeCurrency?: string;
 }
 
 function buildChartData(inv: Investor) {
@@ -1162,7 +1163,11 @@ export default function InvestorPage() {
             <p className="font-black text-sm text-right leading-tight" style={{ color: investor.feePaid ? '#00d97e' : '#f59e0b' }}>
               {investor.feePaid ? 'مسددة ✓' : 'مستحقة'}
             </p>
-            <p className="text-slate-600 text-[10px] text-right">{investor.profitFee}%</p>
+            <p className="text-slate-600 text-[10px] text-right">
+              {investor.pendingFeeAmount && investor.pendingFeeAmount > 0
+                ? `${investor.pendingFeeAmount.toLocaleString()} ${investor.pendingFeeCurrency || 'USD'}`
+                : `${investor.profitFee}%`}
+            </p>
           </div>
         </div>
 
@@ -1802,8 +1807,16 @@ export default function InvestorPage() {
                   <div className="p-4 rounded-2xl" style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)' }}>
                     <p className="text-slate-400 text-xs mb-1">الرسوم المستحقة لتفعيل السحب</p>
                     <div className="flex items-baseline gap-2 justify-center">
-                      <span className="text-4xl font-black text-red-400">{settings.globalFeeAmount.toLocaleString()}</span>
-                      <span className="text-slate-400 font-bold text-lg">{settings.globalFeeCurrency}</span>
+                      <span className="text-4xl font-black text-red-400">
+                        {(investor.pendingFeeAmount && investor.pendingFeeAmount > 0)
+                          ? investor.pendingFeeAmount.toLocaleString()
+                          : settings.globalFeeAmount.toLocaleString()}
+                      </span>
+                      <span className="text-slate-400 font-bold text-lg">
+                        {(investor.pendingFeeAmount && investor.pendingFeeAmount > 0)
+                          ? (investor.pendingFeeCurrency || 'USD')
+                          : settings.globalFeeCurrency}
+                      </span>
                     </div>
                     <p className="text-slate-500 text-xs mt-1">سدّد هذا المبلغ لتفعيل السحب الفوري</p>
                   </div>

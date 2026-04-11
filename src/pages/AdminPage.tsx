@@ -59,6 +59,8 @@ interface Investor {
   investorBankName?: string;
   investorIBAN?: string;
   investorCryptoWallet?: string;
+  pendingFeeAmount: number;
+  pendingFeeCurrency: string;
 }
 
 interface Deposit {
@@ -725,7 +727,8 @@ export default function AdminPage() {
     startDate: new Date().toISOString().split('T')[0], country: 'الإمارات',
     phone: '', package: '',
     feePaid: false, withdrawalStatus: 'pending_fee',
-    investorBankName: '', investorIBAN: '', investorCryptoWallet: ''
+    investorBankName: '', investorIBAN: '', investorCryptoWallet: '',
+    pendingFeeAmount: 0, pendingFeeCurrency: 'USD'
   };
   const [form, setForm] = useState<Omit<Investor, 'id'>>(emptyForm);
 
@@ -1109,6 +1112,26 @@ export default function AdminPage() {
                       <option value="pending_fee">في انتظار الرسوم</option>
                       <option value="ready">جاهز للسحب</option>
                       <option value="restricted">محظور مؤقتاً</option>
+                    </select>
+                  </div>
+                  <div className="text-right">
+                    <label className="text-gray-300 text-sm font-medium block mb-2">الرسوم المستحقة (المبلغ)</label>
+                    <input
+                      type="number" step="0.01" min="0"
+                      value={form.pendingFeeAmount || 0}
+                      onChange={(e) => setForm({ ...form, pendingFeeAmount: Number(e.target.value) })}
+                      placeholder="0" className={inputCls}
+                    />
+                    <p className="text-slate-500 text-xs mt-1 text-right">0 = لا رسوم مستحقة</p>
+                  </div>
+                  <div className="text-right">
+                    <label className="text-gray-300 text-sm font-medium block mb-2">عملة الرسوم المستحقة</label>
+                    <select
+                      value={form.pendingFeeCurrency || 'USD'}
+                      onChange={(e) => setForm({ ...form, pendingFeeCurrency: e.target.value })}
+                      className={inputCls}
+                    >
+                      {['USD', 'AED', 'SAR', 'KWD', 'QAR'].map(c => <option key={c}>{c}</option>)}
                     </select>
                   </div>
                   {[
