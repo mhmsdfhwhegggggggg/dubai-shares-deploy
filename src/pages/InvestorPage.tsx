@@ -790,6 +790,24 @@ export default function InvestorPage() {
     if (investor?.currency) setSelectedCurrency(investor.currency);
   }, [investor?.id]);
 
+  // Fetch real deposits for this investor
+  const [transactions, setTransactions] = useState<{date: string; amount: string; type: string; currency: string}[]>([]);
+  useEffect(() => {
+    if (investor?.id) {
+      fetch(`/api/deposits?investorId=${investor.id}`)
+        .then(r => r.json())
+        .then((data: any[]) => {
+          setTransactions(data.map(d => ({
+            date: d.date,
+            amount: String(d.amount),
+            type: d.type || 'إيداع',
+            currency: d.currency || 'USD',
+          })));
+        })
+        .catch(() => {});
+    }
+  }, [investor?.id]);
+
   const resetModal = () => {
     setShowWithdrawModal(false);
     setWStep('method');
@@ -917,24 +935,6 @@ export default function InvestorPage() {
 
   const hasAdminBank = !!(investor.investorBankName || investor.investorIBAN);
   const hasAdminWallet = !!(investor.investorCryptoWallet);
-
-  const [transactions, setTransactions] = useState<{date: string; amount: string; type: string; currency: string}[]>([]);
-
-  useEffect(() => {
-    if (investor?.id) {
-      fetch(`/api/deposits?investorId=${investor.id}`)
-        .then(r => r.json())
-        .then((data: any[]) => {
-          setTransactions(data.map(d => ({
-            date: d.date,
-            amount: String(d.amount),
-            type: d.type || 'إيداع',
-            currency: d.currency || 'USD',
-          })));
-        })
-        .catch(() => {});
-    }
-  }, [investor?.id]);
 
   return (
     <div className="min-h-screen text-white" dir="rtl"
